@@ -1,4 +1,4 @@
-import AudioWrapper from "@/components/AudioWrapper";
+import AudioDropzone from "@/components/AudioDropzone";
 
 export default function Home() {
   return (
@@ -14,11 +14,11 @@ export default function Home() {
           width: "100vw",
           backgroundColor: "#000000",
           color: "#ffffff",
-          fontSize: "2rem",
+          fontSize: "1rem",
           fontFamily: "sans-serif",
         }}
       >
-        <AudioWrapper />
+        <AudioDropzone />
       </div>
     </>
   );
