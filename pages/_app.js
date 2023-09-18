@@ -4,6 +4,22 @@ import CssBaseline from "@mui/material/CssBaseline";
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
+    background: {
+      default: "#16171B",
+      paper: "#202125",
+    },
+    primary: {
+      main: "#01b075",
+    },
+    text: {
+      primary: "#EEEEEE",
+    },
+  },
+  shape: {
+    borderRadius: 10,
+  },
+  typography: {
+    fontFamily: '"Rajdhani", sans-serif', // Use Rajdhani as the primary font
   },
 });
 

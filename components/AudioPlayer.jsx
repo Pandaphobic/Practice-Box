@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
+  Card,
   Grid,
   IconButton,
   TextField,
@@ -101,6 +102,12 @@ export default function AudioPlayer({ audioSrc }) {
     }
   };
 
+  const onRestart = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = startTime;
+    }
+  };
+
   const onVolumeChange = (event) => {
     const newVolume = parseFloat(event.target.value);
     setVolume(newVolume);
@@ -117,35 +124,23 @@ export default function AudioPlayer({ audioSrc }) {
     }
   };
 
+  const inputStyle = {
+    width: "5em",
+    backgroundColor: "#16171B",
+    color: "#FFFFFF",
+    outline: "none",
+    border: "none",
+    padding: "4px",
+    // on focus
+    "&:focus": {
+      backgroundColor: "#000000",
+      color: "#FFFFFF",
+      outline: "none",
+    },
+  };
+
   return (
     <Box>
-      <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
-
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="BPM"
-            size="small"
-            type="number"
-            value={bpm}
-            onChange={(e) => setBpm(Number(e.target.value))}
-          />
-          <TapTempo setMainBpm={setBpm} />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="# Count-In Beats"
-            size="small"
-            type="number"
-            value={countIn}
-            onChange={(e) => setCountIn(Number(e.target.value))}
-          />
-          <Button variant="contained" onClick={playWithCountIn}>
-            Count-In
-          </Button>
-        </Grid>
-      </Grid>
-
       {currentCount !== null && (
         <Box
           style={{
@@ -159,63 +154,158 @@ export default function AudioPlayer({ audioSrc }) {
           {currentCount}
         </Box>
       )}
+      <Card style={{ padding: "20px", marginTop: "20px" }}>
+        <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
+
+        <Grid container xs={12}>
+          <Grid
+            item
+            xs={12}
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              width: "100%",
+              justifyContent: "center",
+              paddingBottom: "1em",
+            }}
+          >
+            <Typography
+              variant="h5"
+              color="primary"
+              style={{ fontWeight: "600" }}
+            >
+              Practice Box
+            </Typography>
+          </Grid>
+
+          <Grid
+            item
+            xs={4}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="body1">BPM:</Typography>
+            <input
+              style={inputStyle}
+              size="small"
+              type="number"
+              value={bpm}
+              onChange={(e) => setBpm(Number(e.target.value))}
+            />
+            <TapTempo setMainBpm={setBpm} />
+          </Grid>
+          <Grid
+            item
+            xs={4}
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "left",
+            }}
+          >
+            <Typography variant="body1">Count-In: </Typography>
+            <input
+              style={inputStyle}
+              size="small"
+              type="number"
+              value={countIn}
+              onChange={(e) => setCountIn(Number(e.target.value))}
+            />
+          </Grid>
+          <Grid
+            item
+            xs={4}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "left",
+            }}
+          >
+            <Typography variant="body1">Start Time:</Typography>
+            <input
+              style={inputStyle}
+              size="small"
+              type="number"
+              value={startTime}
+              onChange={onTimeChange}
+              step="0.01"
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs={2} style={{ paddingTop: "1em" }}>
+          <Box
+            style={{
+              // take up all available space
+              width: "100%",
+              height: "325px",
+              // make it a flex container
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#000000",
+            }}
+          >
+            <Typography variant="h5">Imported Audio</Typography>
+            <Typography variant="body1">
+              The imported audio will play at {bpm} BPM.
+            </Typography>
+          </Box>
+          <Box
+            style={{
+              width: "100%",
+              height: "20px",
+              backgroundColor: "#ddd",
+              marginTop: "20px",
+              position: "relative",
+              cursor: "pointer",
+            }}
+            onClick={onTimelineClick}
+          >
+            <Box
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                height: "100%",
+                width: `${progress}%`,
+                backgroundColor: "#666",
+              }}
+            />
+          </Box>
+          <Box id="controls">
+            <IconButton variant="contained" onClick={onPlay}>
+              <PlayArrowIcon />
+            </IconButton>
+            <IconButton variant="contained" onClick={onStop}>
+              <StopIcon />
+            </IconButton>
+            <IconButton variant="contained" onClick={onRestart}>
+              <RestartAltIcon />
+            </IconButton>
+            Volume:
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={onVolumeChange}
+            />
+          </Box>
+        </Grid>
+      </Card>
+
       <Box>
         <audio ref={audioRef} style={{ display: "none" }}>
           <source src={audioSrc} type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
-
-        <Box id="controls">
-          <IconButton variant="contained" onClick={onPlay}>
-            <PlayArrowIcon />
-          </IconButton>
-          <IconButton variant="contained" onClick={onStop}>
-            <StopIcon />
-          </IconButton>
-        </Box>
-        <Box>
-          Volume:
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={onVolumeChange}
-          />
-        </Box>
-        <Box>
-          <TextField
-            label="Start Time"
-            size="small"
-            type="number"
-            value={startTime}
-            onChange={onTimeChange}
-            step="0.1"
-          />
-        </Box>
-        <Box
-          style={{
-            width: "100%",
-            height: "20px",
-            backgroundColor: "#ddd",
-            marginTop: "20px",
-            position: "relative",
-            cursor: "pointer",
-          }}
-          onClick={onTimelineClick}
-        >
-          <Box
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              height: "100%",
-              width: `${progress}%`,
-              backgroundColor: "#666",
-            }}
-          />
-        </Box>
       </Box>
     </Box>
   );
@@ -257,7 +347,15 @@ function TapTempo({ setMainBpm }) {
   };
 
   return (
-    <Button variant="contained" onClick={handleTap}>
+    <Button
+      style={{
+        width: "2",
+        borderRadius: "6px",
+        padding: "0",
+      }}
+      variant="contained"
+      onClick={handleTap}
+    >
       Tap
     </Button>
   );
