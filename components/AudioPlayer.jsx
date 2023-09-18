@@ -10,7 +10,6 @@ export default function AudioPlayer({ audioSrc }) {
   const [bpm, setBpm] = useState(140);
   const [countIn, setCountIn] = useState(4);
   const [currentCount, setCurrentCount] = useState(null);
-  const [isFlashing, setIsFlashing] = useState(false);
   // Imported audio state
   const [startTime, setStartTime] = useState(0);
   const [volume, setVolume] = useState(0.45);
@@ -32,11 +31,8 @@ export default function AudioPlayer({ audioSrc }) {
         blockAudioRef.current.play();
       }
 
-      setIsFlashing(true); // Visual cue for countdown
-
       const countdownInterval = setInterval(() => {
         setCurrentCount((prevCount) => prevCount - 1);
-        setIsFlashing(false); // Reset flashing
       }, millisecondsPerBeat);
 
       return () => {
@@ -56,6 +52,7 @@ export default function AudioPlayer({ audioSrc }) {
     const handleTimeUpdate = () => {
       const percentage =
         (audioElement.currentTime / audioElement.duration) * 100;
+      console.log("CurrentTime", audioElement.currentTime);
       setProgress(percentage);
     };
 
@@ -68,7 +65,7 @@ export default function AudioPlayer({ audioSrc }) {
         audioElement.removeEventListener("timeupdate", handleTimeUpdate);
       }
     };
-  }, []);
+  }, [audioSrc]);
 
   const playWithCountIn = () => {
     setCurrentCount(countIn);
@@ -134,172 +131,163 @@ export default function AudioPlayer({ audioSrc }) {
 
   return (
     <Box>
-      {currentCount !== null && (
-        <Box
-          style={{
-            fontSize: "100px",
-            textAlign: "center",
-            backgroundColor: "black",
-            color: isFlashing ? "white" : "black",
-            transition: "color 0.2s",
-          }}
-        >
-          {currentCount}
-        </Box>
-      )}
-      <Card style={{ padding: "20px", marginTop: "20px" }}>
-        <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
+      {audioSrc && (
+        <Card style={{ padding: "20px", marginTop: "20px" }}>
+          <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
 
-        <Grid container>
-          <Grid
-            item
-            xs={12}
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              width: "100%",
-              justifyContent: "center",
-              paddingBottom: "1em",
-            }}
-          >
-            <Typography
-              variant="h5"
-              color="primary"
-              style={{ fontWeight: "600" }}
+          <Grid container>
+            <Grid
+              item
+              xs={12}
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                width: "100%",
+                justifyContent: "center",
+                paddingBottom: "1em",
+              }}
             >
-              Practice Box
-            </Typography>
-          </Grid>
+              <Typography
+                variant="h5"
+                color="primary"
+                style={{ fontWeight: "600" }}
+              >
+                Practice Box
+              </Typography>
+            </Grid>
 
-          <Grid
-            item
-            xs={4}
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="body1">BPM:</Typography>
-            <input
-              style={inputStyle}
-              size="small"
-              type="number"
-              value={bpm}
-              onChange={(e) => setBpm(Number(e.target.value))}
-            />
-            <TapTempo setMainBpm={setBpm} />
+            <Grid
+              item
+              xs={4}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="body1">BPM:</Typography>
+              <input
+                style={inputStyle}
+                size="small"
+                type="number"
+                value={bpm}
+                onChange={(e) => setBpm(Number(e.target.value))}
+              />
+              <TapTempo setMainBpm={setBpm} />
+            </Grid>
+            <Grid
+              item
+              xs={4}
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "left",
+              }}
+            >
+              <Typography variant="body1">Count-In: </Typography>
+              <input
+                style={inputStyle}
+                size="small"
+                type="number"
+                value={countIn}
+                onChange={(e) => setCountIn(Number(e.target.value))}
+              />
+            </Grid>
+            <Grid
+              item
+              xs={4}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "left",
+              }}
+            >
+              <Typography variant="body1">Start Time:</Typography>
+              <input
+                style={inputStyle}
+                size="small"
+                type="number"
+                value={startTime}
+                onChange={onTimeChange}
+                step="0.01"
+              />
+            </Grid>
           </Grid>
-          <Grid
-            item
-            xs={4}
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "left",
-            }}
-          >
-            <Typography variant="body1">Count-In: </Typography>
-            <input
-              style={inputStyle}
-              size="small"
-              type="number"
-              value={countIn}
-              onChange={(e) => setCountIn(Number(e.target.value))}
-            />
-          </Grid>
-          <Grid
-            item
-            xs={4}
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "left",
-            }}
-          >
-            <Typography variant="body1">Start Time:</Typography>
-            <input
-              style={inputStyle}
-              size="small"
-              type="number"
-              value={startTime}
-              onChange={onTimeChange}
-              step="0.01"
-            />
-          </Grid>
-        </Grid>
-        <Grid item xs={2} style={{ paddingTop: "1em" }}>
-          <Box
-            style={{
-              // take up all available space
-              width: "100%",
-              height: "325px",
-              // make it a flex container
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#000000",
-            }}
-          >
-            <Typography variant="h5">Imported Audio</Typography>
-            <Typography variant="body1">
-              The imported audio will play at {bpm} BPM.
-            </Typography>
-          </Box>
-          <Box
-            style={{
-              width: "100%",
-              height: "20px",
-              backgroundColor: "#ddd",
-              marginTop: "20px",
-              position: "relative",
-              cursor: "pointer",
-            }}
-            onClick={onTimelineClick}
-          >
+          <Grid item xs={2} style={{ paddingTop: "1em" }}>
             <Box
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                height: "100%",
-                width: `${progress}%`,
-                backgroundColor: "#666",
+                // take up all available space
+                width: "100%",
+                height: "325px",
+                // make it a flex container
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#000000",
               }}
-            />
+            >
+              <Typography
+                variant="h1"
+                color="primary"
+                style={{ fontWeight: "600" }}
+              >
+                {currentCount}
+              </Typography>
+            </Box>
+            <Box
+              style={{
+                width: "100%",
+                height: "20px",
+                backgroundColor: "#ddd",
+                marginTop: "20px",
+                position: "relative",
+                cursor: "pointer",
+              }}
+              onClick={onTimelineClick}
+            >
+              <Box
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  height: "100%",
+                  width: `${progress}%`,
+                  backgroundColor: "#666",
+                }}
+              />
+            </Box>
+            <Box id="controls">
+              <IconButton variant="contained" onClick={playWithCountIn}>
+                <PlayArrowIcon />
+              </IconButton>
+              <IconButton variant="contained" onClick={onStop}>
+                <StopIcon />
+              </IconButton>
+              <IconButton variant="contained" onClick={onRestart}>
+                <RestartAltIcon />
+              </IconButton>
+              Volume:
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={onVolumeChange}
+              />
+            </Box>
+          </Grid>
+          <Box>
+            <audio ref={audioRef}>
+              <source src={audioSrc} type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
           </Box>
-          <Box id="controls">
-            <IconButton variant="contained" onClick={playWithCountIn}>
-              <PlayArrowIcon />
-            </IconButton>
-            <IconButton variant="contained" onClick={onStop}>
-              <StopIcon />
-            </IconButton>
-            <IconButton variant="contained" onClick={onRestart}>
-              <RestartAltIcon />
-            </IconButton>
-            Volume:
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={volume}
-              onChange={onVolumeChange}
-            />
-          </Box>
-        </Grid>
-      </Card>
-
-      <Box>
-        <audio ref={audioRef}>
-          <source src={audioSrc} type="audio/mpeg" />
-          Your browser does not support the audio element.
-        </audio>
-      </Box>
+        </Card>
+      )}
     </Box>
   );
 }
