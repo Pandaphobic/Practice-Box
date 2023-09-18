@@ -1,18 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  Grid,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Card, Grid, IconButton, Typography } from "@mui/material";
 // Icons
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import PauseIcon from "@mui/icons-material/Pause";
 
 export default function AudioPlayer({ audioSrc }) {
   // Metronome state
@@ -28,6 +19,8 @@ export default function AudioPlayer({ audioSrc }) {
   const audioRef = useRef(null);
   // Block sound
   const blockAudioRef = useRef(null);
+
+  console.log("audioSrc", audioSrc);
 
   useEffect(() => {
     if (currentCount !== null && currentCount > 0) {
@@ -50,7 +43,7 @@ export default function AudioPlayer({ audioSrc }) {
         clearInterval(countdownInterval); // Clean up the interval
       };
     } else if (currentCount === 0) {
-      const audioElement = document.querySelector("audio:not(#block-audio)");
+      const audioElement = audioRef.current;
       if (audioElement) {
         audioElement.play();
       }
@@ -157,7 +150,7 @@ export default function AudioPlayer({ audioSrc }) {
       <Card style={{ padding: "20px", marginTop: "20px" }}>
         <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
 
-        <Grid container xs={12}>
+        <Grid container>
           <Grid
             item
             xs={12}
@@ -279,7 +272,7 @@ export default function AudioPlayer({ audioSrc }) {
             />
           </Box>
           <Box id="controls">
-            <IconButton variant="contained" onClick={onPlay}>
+            <IconButton variant="contained" onClick={playWithCountIn}>
               <PlayArrowIcon />
             </IconButton>
             <IconButton variant="contained" onClick={onStop}>
@@ -302,7 +295,7 @@ export default function AudioPlayer({ audioSrc }) {
       </Card>
 
       <Box>
-        <audio ref={audioRef} style={{ display: "none" }}>
+        <audio ref={audioRef}>
           <source src={audioSrc} type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
