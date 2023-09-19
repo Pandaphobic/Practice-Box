@@ -1,0 +1,35 @@
+/* Styles.css or your preferred CSS file */
+.range-slider {
+  /* Rotate the range slider to make it vertical */
+  transform: rotate(-90deg);
+  width: 200px; /* Adjust this to your desired width */
+  height: 20px;
+}
+
+.range-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(red, yellow, green);
+  height: 20px;
+  border-radius: 10px;
+}
+
+.range-slider::-webkit-slider-thumb {
+  height: 30px; /* Thumb height */
+  width: 20px; /* Thumb width */
+  background-color: white; /* Thumb color */
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.range-slider::-moz-range-track {
+  background: linear-gradient(red, yellow, green);
+  height: 20px;
+  border-radius: 10px;
+}
+
+.range-slider::-moz-range-thumb {
+  height: 30px;
+  width: 20px;
+  background-color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}

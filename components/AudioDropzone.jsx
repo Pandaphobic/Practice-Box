@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AudioPlayer from "./AudioPlayer";
+import { Box, Typography } from "@mui/material";
 
 export default function AudioDropzone() {
   const [audioSrc, setAudioSrc] = useState(null);
@@ -23,25 +24,27 @@ export default function AudioDropzone() {
   };
 
   return (
-    <div
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-      style={{
-        border: !audioSrc ? "2px dashed #aaa" : "none",
-        padding: "20px",
-        position: "relative",
-        height: "200px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {audioSrc ? (
-        <AudioPlayer audioSrc={audioSrc} />
-      ) : (
-        <p>Drop your audio file here</p>
+    <Box>
+      {!audioSrc && (
+        <div
+          onDrop={onDrop}
+          onDragOver={onDragOver}
+          style={{
+            border: "2px dashed #aaa",
+            padding: "20px",
+            position: "relative",
+            height: "200px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "10px",
+          }}
+        >
+          <Typography variant="h5">Drop your audio file here</Typography>
+        </div>
       )}
-    </div>
+      <AudioPlayer audioSrc={audioSrc} />
+    </Box>
   );
 }
