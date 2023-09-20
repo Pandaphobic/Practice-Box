@@ -4,6 +4,7 @@ import { Box, Button, Card, Grid, IconButton, Typography } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import YouTubeComponent from "./YTPlayer";
 
 export default function AudioPlayer({ audioSrc }) {
   // Metronome state

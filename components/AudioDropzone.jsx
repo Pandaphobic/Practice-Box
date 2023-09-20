@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AudioPlayer from "./AudioPlayer";
 import { Box, Typography } from "@mui/material";
+import YouTubeComponent from "./YTPlayer";
 
 export default function AudioDropzone() {
   const [audioSrc, setAudioSrc] = useState(null);
@@ -44,6 +45,7 @@ export default function AudioDropzone() {
           <Typography variant="h5">Drop your audio file here</Typography>
         </div>
       )}
+      <YouTubeComponent />
       <AudioPlayer audioSrc={audioSrc} />
     </Box>
   );

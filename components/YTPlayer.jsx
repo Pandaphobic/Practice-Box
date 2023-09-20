@@ -1,26 +1,58 @@
-import React from "react";
-import YTPlayer from "yt-player";
+import React, { useEffect, useRef, useState } from "react";
+import YouTubePlayer from "yt-player";
 
-export default function YTVideoPlayer({ ytSource }) {
-  const [player, setPlayer] = React.useState(null);
-  YTPlayer.player = player;
+function YouTubeComponent() {
+  const [videoId, setVideoId] = useState("T1xLQG0OakM");
+
+  const playerElRef = useRef(null);
+  const ytPlayerRef = useRef(null);
 
   useEffect(() => {
-    const ytPlayer = new YTPlayer("#youtube-player");
-    ytPlayer.load(ytSource, true);
-
-    ytPlayer.on("timeupdate", (time) => {
-      const percentage = (time / ytPlayer.getDuration()) * 100;
-      setProgress(percentage);
+    // Initialize the player with the ref to the DOM element
+    ytPlayerRef.current = new YouTubePlayer(playerElRef.current, {
+      width: 640,
+      height: 360,
     });
+    // Load the video and set initial configurations
+    ytPlayerRef.current.load(videoId, false);
+    ytPlayerRef.current.setVolume(100);
 
-    setPlayer(ytPlayer);
-
-    // Cleanup
+    // Cleanup: Destroy the ytPlayerRef.current when the component is unmounted
     return () => {
-      ytPlayer.destroy();
+      ytPlayerRef.current.destroy();
     };
-  }, [ytSource]);
+  }, [videoId]);
 
-  return <div id="youtube-player" style={{ display: "none" }}></div>;
+  const handleStart = () => {
+    if (playerElRef.current) {
+      ytPlayerRef.current.play();
+    }
+  };
+
+  const handlePause = () => {
+    // Renamed from handleStop to handlePause
+    if (playerElRef.current) {
+      ytPlayerRef.current.pause();
+    }
+  };
+
+  const handleVideoIdChange = (event) => {
+    // incoming video link - trim so that only the video id is used
+    // ex: https://www.youtube.com/watch?v=T1xLQG0OakM
+    // becomes: T1xLQG0OakM
+
+    const videoId = event.target.value.split("=")[1];
+    setVideoId(videoId);
+  };
+
+  return (
+    <div>
+      <div ref={playerElRef}></div>
+      <button onClick={handleStart}>Start</button>
+      <button onClick={handlePause}>Pause</button>
+      <input type="text" value={videoId} onChange={handleVideoIdChange} />
+    </div>
+  );
 }
+
+export default YouTubeComponent;
