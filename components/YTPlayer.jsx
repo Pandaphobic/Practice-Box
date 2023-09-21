@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import YouTubePlayer from "yt-player";
 
-function YouTubeComponent() {
-  const [videoId, setVideoId] = useState("T1xLQG0OakM");
-
+function YouTubeComponent({ videoUrl }) {
   const playerElRef = useRef(null);
   const ytPlayerRef = useRef(null);
 
   useEffect(() => {
+    if (!videoUrl) {
+      return;
+    }
+    // fix the video id https://www.youtube.com/watch?v=-xKM3mGt2pE& should be -xKM3mGt2pE
+    const videoId = videoUrl.split("v=")[1].split("&")[0];
+
     // Initialize the player with the ref to the DOM element
     ytPlayerRef.current = new YouTubePlayer(playerElRef.current, {
       width: 640,
@@ -21,7 +25,7 @@ function YouTubeComponent() {
     return () => {
       ytPlayerRef.current.destroy();
     };
-  }, [videoId]);
+  }, [videoUrl]);
 
   const handleStart = () => {
     if (playerElRef.current) {
@@ -36,21 +40,11 @@ function YouTubeComponent() {
     }
   };
 
-  const handleVideoIdChange = (event) => {
-    // incoming video link - trim so that only the video id is used
-    // ex: https://www.youtube.com/watch?v=T1xLQG0OakM
-    // becomes: T1xLQG0OakM
-
-    const videoId = event.target.value.split("=")[1];
-    setVideoId(videoId);
-  };
-
   return (
     <div>
       <div ref={playerElRef}></div>
       <button onClick={handleStart}>Start</button>
       <button onClick={handlePause}>Pause</button>
-      <input type="text" value={videoId} onChange={handleVideoIdChange} />
     </div>
   );
 }

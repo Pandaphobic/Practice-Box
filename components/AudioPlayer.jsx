@@ -4,21 +4,29 @@ import { Box, Button, Card, Grid, IconButton, Typography } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import YouTubeComponent from "./YTPlayer";
+import { TapTempo } from "./TapTempo";
+import Countdown from "./Countdown";
+import ProgressBar from "./ProgressBar";
+import { useAudio } from "@/store/context";
 
 export default function AudioPlayer({ audioSrc }) {
   // Metronome state
-  const [bpm, setBpm] = useState(140);
-  const [countIn, setCountIn] = useState(4);
-  const [currentCount, setCurrentCount] = useState(null);
-  // Imported audio state
-  const [startTime, setStartTime] = useState(0);
-  const [volume, setVolume] = useState(0.45);
-  const [progress, setProgress] = useState(0);
-  // Song / imported audio
-  const audioRef = useRef(null);
-  // Block sound
-  const blockAudioRef = useRef(null);
+  const {
+    bpm,
+    setBpm,
+    countIn,
+    setCountIn,
+    currentCount,
+    setCurrentCount,
+    startTime,
+    setStartTime,
+    volume,
+    setVolume,
+    progress,
+    setProgress,
+    audioRef,
+    blockAudioRef,
+  } = useAudio();
 
   console.log("audioSrc", audioSrc);
 
@@ -158,108 +166,43 @@ export default function AudioPlayer({ audioSrc }) {
               </Typography>
             </Grid>
 
-            <Grid
-              item
-              xs={4}
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="body1">BPM:</Typography>
-              <input
-                style={inputStyle}
-                size="small"
-                type="number"
-                value={bpm}
-                onChange={(e) => setBpm(Number(e.target.value))}
-              />
-              <TapTempo setMainBpm={setBpm} />
-            </Grid>
-            <Grid
-              item
-              xs={4}
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "left",
-              }}
-            >
-              <Typography variant="body1">Count-In: </Typography>
-              <input
-                style={inputStyle}
-                size="small"
-                type="number"
-                value={countIn}
-                onChange={(e) => setCountIn(Number(e.target.value))}
-              />
-            </Grid>
-            <Grid
-              item
-              xs={4}
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "left",
-              }}
-            >
-              <Typography variant="body1">Start Time:</Typography>
-              <input
-                style={inputStyle}
-                size="small"
-                type="number"
-                value={startTime}
-                onChange={onTimeChange}
-                step="0.01"
-              />
-            </Grid>
+            <Typography variant="body1">BPM:</Typography>
+            <input
+              style={inputStyle}
+              size="small"
+              type="number"
+              value={bpm}
+              onChange={(e) => setBpm(Number(e.target.value))}
+            />
+            <TapTempo setMainBpm={setBpm} />
+
+            <Typography variant="body1">Count-In: </Typography>
+            <input
+              style={inputStyle}
+              size="small"
+              type="number"
+              value={countIn}
+              onChange={(e) => setCountIn(Number(e.target.value))}
+            />
+
+            <Typography variant="body1">Start Time:</Typography>
+            <input
+              style={inputStyle}
+              size="small"
+              type="number"
+              value={startTime}
+              onChange={onTimeChange}
+              step="0.01"
+            />
           </Grid>
           <Grid item xs={2} style={{ paddingTop: "1em" }}>
-            <Box
-              style={{
-                // take up all available space
-                width: "100%",
-                height: "325px",
-                // make it a flex container
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#000000",
-              }}
-            >
-              <Typography
-                variant="h1"
-                color="primary"
-                style={{ fontWeight: "600" }}
-              >
-                {currentCount}
-              </Typography>
-            </Box>
-            <Box
-              style={{
-                width: "100%",
-                height: "20px",
-                backgroundColor: "#ddd",
-                marginTop: "20px",
-                position: "relative",
-                cursor: "pointer",
-              }}
-              onClick={onTimelineClick}
-            >
-              <Box
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  height: "100%",
-                  width: `${progress}%`,
-                  backgroundColor: "#666",
-                }}
-              />
-            </Box>
+            <Countdown currentCount={currentCount} />
+
+            {/* PROGRESS BAR */}
+            <ProgressBar
+              onTimelineClick={onTimelineClick}
+              progress={progress}
+            />
             <Box id="controls">
               <IconButton variant="contained" onClick={playWithCountIn}>
                 <PlayArrowIcon />
@@ -290,55 +233,5 @@ export default function AudioPlayer({ audioSrc }) {
         </Card>
       )}
     </Box>
-  );
-}
-const MAX_TAP_INTERVAL = (60 / 50) * 1000; // Equivalent to 50 BPM
-
-function TapTempo({ setMainBpm }) {
-  const [taps, setTaps] = useState([]);
-  const [bpm, setBpm] = useState(0);
-  const [lastTapTime, setLastTapTime] = useState(null);
-
-  useEffect(() => {
-    if (lastTapTime && Date.now() - lastTapTime > MAX_TAP_INTERVAL) {
-      setTaps([]); // Clear taps if the interval exceeds the max tap interval
-      setLastTapTime(null);
-    }
-  }, [lastTapTime]);
-
-  const handleTap = () => {
-    const now = Date.now();
-    setLastTapTime(now);
-
-    const newTaps = [...taps, now];
-    if (newTaps.length > 4) {
-      newTaps.shift(); // Remove the oldest tap if we exceed 4 taps
-    }
-    setTaps(newTaps);
-
-    if (newTaps.length > 1) {
-      const intervals = [];
-      for (let i = 1; i < newTaps.length; i++) {
-        intervals.push(newTaps[i] - newTaps[i - 1]);
-      }
-      const averageInterval =
-        intervals.reduce((a, b) => a + b) / intervals.length;
-      setBpm(Math.round((60 * 1000) / averageInterval));
-      setMainBpm(Math.round((60 * 1000) / averageInterval));
-    }
-  };
-
-  return (
-    <Button
-      style={{
-        width: "2",
-        borderRadius: "6px",
-        padding: "0",
-      }}
-      variant="contained"
-      onClick={handleTap}
-    >
-      Tap
-    </Button>
   );
 }

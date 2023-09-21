@@ -14,3 +14,21 @@
 - [ ] Custom loop count
 - [x] MUI 5
 - [ ] YouTube API
+
+---
+
+## Resuming Notes
+
+- Move the video components to a class component that returns the right player given the source
+  - Add a YouTube player
+  - Add drag n drop file player
+    - mp3
+    - wav
+- Need a controller component
+  - Play/Pause
+  - Stop
+  - Restart
+  - Set start (with increment)
+  - Set BPM with Tap Tempo
+  - Set # of beats / count in
+- Timeline
