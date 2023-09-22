@@ -11,12 +11,11 @@ export const AudioProvider = ({ children }) => {
   // Only the state
   const [bpm, setBpm] = useState(140);
   const [countIn, setCountIn] = useState(4);
-  const [currentCount, setCurrentCount] = useState(null);
+  const [currentCount, setCurrentCount] = useState(0);
   const [startTime, setStartTime] = useState(0);
   const [volume, setVolume] = useState(0.45);
   const [progress, setProgress] = useState(0);
 
-  const audioRef = useRef(null);
   const blockAudioRef = useRef(null);
 
   return (
@@ -34,7 +33,6 @@ export const AudioProvider = ({ children }) => {
         setVolume,
         progress,
         setProgress,
-        audioRef,
         blockAudioRef,
       }}
     >

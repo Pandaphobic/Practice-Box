@@ -1,11 +1,12 @@
 import AudioPlayer from "@/components/AudioPlayer";
+import FilePlayer from "@/components/FilePlayer";
 import YouTubeComponent from "@/components/YTPlayer";
 import { Box, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 
 export default function Home() {
-  const [audioSrc, setAudioSrc] = useState(null);
-  const [videoUrl, setVideoUrl] = useState(null);
+  const [audioSrc, setAudioSrc] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
 
   const onDrop = (event) => {
     event.preventDefault();
@@ -72,9 +73,18 @@ export default function Home() {
             />
           </div>
         )}
-
-        {videoUrl && <YouTubeComponent videoUrl={videoUrl} />}
-        {audioSrc && <AudioPlayer audioSrc={audioSrc} />}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "10px",
+          }}
+        >
+          {videoUrl && <YouTubeComponent videoUrl={videoUrl} />}
+          {audioSrc && <FilePlayer audioSrc={audioSrc} />}
+        </Box>
       </Box>
     </>
   );
