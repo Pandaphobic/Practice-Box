@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import YouTubePlayer from "yt-player";
-import { Box, IconButton, Input, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
+// Material UI Icons
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
@@ -113,6 +114,7 @@ function YouTubeComponent({ videoUrl }) {
     return () => {
       ytPlayerRef.current.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
 
   const handleStartTimeChange = (event) => {
