@@ -16,9 +16,12 @@
     "@mui/styles": "^5.14.10",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
+    "immer": "^10.0.2",
+    "js-video-url-parser": "^0.5.1",
     "next": "13.4.19",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "yt-player": "^3.6.1"
+    "yt-player": "^3.6.1",
+    "zustand": "^4.4.1"
   }
 }

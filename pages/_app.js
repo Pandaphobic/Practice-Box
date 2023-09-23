@@ -1,5 +1,6 @@
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { AudioContext, AudioProvider } from "@/store/context";
 
 const darkTheme = createTheme({
   palette: {
@@ -26,8 +27,10 @@ const darkTheme = createTheme({
 export default function App({ Component, pageProps }) {
   return (
     <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <Component {...pageProps} />{" "}
+      <AudioProvider>
+        <CssBaseline />
+        <Component {...pageProps} />{" "}
+      </AudioProvider>
     </ThemeProvider>
   );
 }

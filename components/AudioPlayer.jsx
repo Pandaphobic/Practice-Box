@@ -71,7 +71,7 @@ export default function AudioPlayer({ audioSrc }) {
     setCurrentCount(countIn);
   };
 
-  const onTimeChange = (event) => {
+  const onStartTimeChange = (event) => {
     const newStartTime = parseFloat(event.target.value);
     setStartTime(newStartTime);
     if (audioRef.current) {
@@ -210,7 +210,7 @@ export default function AudioPlayer({ audioSrc }) {
                 size="small"
                 type="number"
                 value={startTime}
-                onChange={onTimeChange}
+                onChange={onStartTimeChange}
                 step="0.01"
               />
             </Grid>

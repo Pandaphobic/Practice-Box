@@ -1,15 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
-import YouTubePlayer from "yt-player";
-import { Box, IconButton, Input, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { useAudio } from "@/store/context";
+import { Box, IconButton, Typography } from "@mui/material";
+// Material UI Icons
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-
-// You can copy the ProgressBar component from your FilePlayer component
-import { useAudio } from "@/store/context";
 import { TapTempo } from "./TapTempo";
-import urlParser from "js-video-url-parser";
 import Countdown from "./Countdown";
 
 const inputStyle = {
@@ -27,46 +24,36 @@ const inputStyle = {
   },
 };
 
-function YouTubeComponent({ videoUrl }) {
-  const playerElRef = useRef(null);
-  const ytPlayerRef = useRef(null);
+export default function FilePlayer({ audioSrc }) {
+  const fileAudioRef = useRef(null);
   const progressBarRef = useRef(null);
   // Metronome block sound
-  const block2AudioRef = useRef(null);
-
-  const [videoId, setVideoId] = useState(null);
+  const blockAudioRef = useRef(null);
 
   const {
     volume,
     setVolume,
     countIn,
     setCountIn,
-    setStartTime,
+    currentCount,
+    setCurrentCount,
     startTime,
     bpm,
     setBpm,
-    setCurrentCount,
-    currentCount,
+    setStartTime,
   } = useAudio();
 
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    if (!videoUrl) return;
-    const parsed = urlParser.parse(videoUrl);
-    if (!parsed || !parsed.id) return;
-    setVideoId(parsed.id);
-  }, [videoUrl]);
-
-  useEffect(() => {
     if (currentCount !== null && currentCount > 0) {
       const millisecondsPerBeat = (60 / bpm) * 1000;
 
       // Play the block sound for every number except 0
-      if (block2AudioRef.current) {
-        block2AudioRef.current.currentTime = 0; // Reset audio to start
-        block2AudioRef.current.play();
+      if (blockAudioRef.current) {
+        blockAudioRef.current.currentTime = 0; // Reset audio to start
+        blockAudioRef.current.play();
       }
 
       const countdownInterval = setInterval(() => {
@@ -77,55 +64,69 @@ function YouTubeComponent({ videoUrl }) {
         clearInterval(countdownInterval); // Clean up the interval
       };
     } else if (currentCount === 0) {
-      const audioElement = playerElRef.current;
+      const audioElement = fileAudioRef.current;
       if (audioElement) {
-        handlePlay();
+        audioElement.play();
       }
       setCurrentCount(null); // Reset currentCount
     }
   }, [currentCount, bpm, setCurrentCount]);
 
   useEffect(() => {
-    if (!videoId) return;
-
-    ytPlayerRef.current = new YouTubePlayer(playerElRef.current, {
-      width: 640,
-      height: 360,
-    });
-    ytPlayerRef.current.load(videoId, false);
-    ytPlayerRef.current.setVolume(volume * 100);
-
-    // Update progress based on currentTime
-    ytPlayerRef.current.on("timeupdate", (currentTime) => {
+    const audioElement = fileAudioRef.current;
+    const handleTimeUpdate = () => {
+      // update isPlaying state
+      setIsPlaying(audioElement?.paused ? false : true);
       const percentage =
-        (currentTime / ytPlayerRef.current.getDuration()) * 100;
+        (audioElement.currentTime / audioElement.duration) * 100;
+      console.log("CurrentTime", audioElement.currentTime);
       setProgress(percentage);
-    });
+    };
 
-    ytPlayerRef.current.on("playing", () => {
-      setIsPlaying(true);
-    });
-
-    ytPlayerRef.current.on("paused", () => {
-      setIsPlaying(false);
-    });
+    if (audioElement) {
+      audioElement.addEventListener("timeupdate", handleTimeUpdate);
+    }
 
     return () => {
-      ytPlayerRef.current.destroy();
+      if (audioElement) {
+        audioElement.removeEventListener("timeupdate", handleTimeUpdate);
+      }
     };
-  }, [videoId]);
+  }, [audioSrc]);
 
-  const handleStartTimeChange = (event) => {
-    const newStartTime = parseFloat(event.target.value);
-    setStartTime(newStartTime);
-    if (ytPlayerRef.current) {
-      ytPlayerRef.current.seek(newStartTime);
+  const onStop = () => {
+    if (fileAudioRef.current) {
+      fileAudioRef.current.pause();
+      fileAudioRef.current.currentTime = startTime;
     }
   };
 
-  const handlePlay = () => {
-    if (ytPlayerRef.current) {
-      ytPlayerRef.current.play();
+  const onPause = () => {
+    if (fileAudioRef.current) {
+      fileAudioRef.current.pause();
+    }
+  };
+
+  const onRestart = () => {
+    if (fileAudioRef.current) {
+      fileAudioRef.current.currentTime = startTime;
+    }
+  };
+
+  const onVolumeChange = (event) => {
+    const newVolume = parseFloat(event.target.value);
+    setVolume(newVolume);
+    if (fileAudioRef.current) {
+      fileAudioRef.current.volume = newVolume;
+    }
+  };
+
+  const onTimelineClick = (event) => {
+    if (fileAudioRef.current && progressBarRef.current) {
+      const rect = progressBarRef.current.getBoundingClientRect();
+      const clickPosition = (event.clientX - rect.left) / rect.width;
+      fileAudioRef.current.currentTime =
+        clickPosition * fileAudioRef.current.duration;
     }
   };
 
@@ -133,55 +134,21 @@ function YouTubeComponent({ videoUrl }) {
     setCurrentCount(countIn);
   };
 
-  const handlePause = () => {
-    if (ytPlayerRef.current) {
-      ytPlayerRef.current.pause();
+  const onStartTimeChange = (event) => {
+    const newStartTime = parseFloat(event.target.value);
+    setStartTime(newStartTime);
+    if (fileAudioRef.current) {
+      fileAudioRef.current.currentTime = newStartTime;
     }
   };
 
-  const handleStop = () => {
-    if (ytPlayerRef.current) {
-      ytPlayerRef.current.seek(startTime);
-      ytPlayerRef.current.pause();
-    }
-  };
-
-  const handleVolumeChange = (event) => {
-    const newVolume = parseFloat(event.target.value);
-    setVolume(newVolume);
-    if (ytPlayerRef.current) {
-      ytPlayerRef.current.setVolume(newVolume * 100);
-    }
-  };
-
-  const handleTimelineClick = (event) => {
-    event.preventDefault();
-
-    if (ytPlayerRef.current && progressBarRef.current) {
-      const rect = progressBarRef.current.getBoundingClientRect(); // <-- use progressBarRef's bounding box
-      console.log("rect: ", rect);
-      const clickPosition = (event.clientX - rect.left) / rect.width;
-      console.log("clickPosition: ", clickPosition);
-      console.log("duration: ", ytPlayerRef.current.getDuration());
-      ytPlayerRef.current.seek(
-        // round to 2 decimal places
-        Math.round(clickPosition * ytPlayerRef.current.getDuration())
-      );
-      setStartTime(
-        Math.round(clickPosition * ytPlayerRef.current.getDuration())
-      );
-    }
-  };
-
-  const handleRestart = () => {
-    if (ytPlayerRef.current) {
-      ytPlayerRef.current.seek(startTime);
-    }
-  };
-  // return null if no videoId
-  if (!videoId) return null;
   return (
     <Box>
+      <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
+      <audio ref={fileAudioRef}>
+        <source src={audioSrc} type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
       <div
         style={{
           border: "2px dashed #aaa",
@@ -196,8 +163,6 @@ function YouTubeComponent({ videoUrl }) {
       >
         <Countdown currentCount={currentCount} />
       </div>
-      <audio id="block-audio" ref={block2AudioRef} src="/block.wav"></audio>
-      <div ref={playerElRef}></div>
       <Box
         ref={progressBarRef}
         style={{
@@ -208,7 +173,7 @@ function YouTubeComponent({ videoUrl }) {
           position: "relative",
           cursor: "pointer",
         }}
-        onClick={handleTimelineClick}
+        onClick={onTimelineClick}
       >
         <Box
           style={{
@@ -222,7 +187,7 @@ function YouTubeComponent({ videoUrl }) {
         />
       </Box>
       {isPlaying ? (
-        <IconButton variant="contained" onClick={handlePause}>
+        <IconButton variant="contained" onClick={onPause}>
           <PauseIcon />
         </IconButton>
       ) : (
@@ -230,10 +195,10 @@ function YouTubeComponent({ videoUrl }) {
           <PlayArrowIcon />
         </IconButton>
       )}
-      <IconButton variant="contained" onClick={handleStop}>
+      <IconButton variant="contained" onClick={onStop}>
         <StopIcon />
       </IconButton>
-      <IconButton variant="contained" onClick={handleRestart}>
+      <IconButton variant="contained" onClick={onRestart}>
         <RestartAltIcon />
       </IconButton>
       Volume:
@@ -243,12 +208,11 @@ function YouTubeComponent({ videoUrl }) {
         max="1"
         step="0.01"
         value={volume}
-        onChange={handleVolumeChange}
+        onChange={onVolumeChange}
       />
       <Typography variant="body1">BPM:</Typography>
       <input
         style={inputStyle}
-        size="small"
         type="number"
         value={bpm}
         onChange={(e) => setBpm(Number(e.target.value))}
@@ -257,7 +221,6 @@ function YouTubeComponent({ videoUrl }) {
       <Typography variant="body1">Count-In: </Typography>
       <input
         style={inputStyle}
-        size="small"
         type="number"
         value={countIn}
         onChange={(e) => setCountIn(Number(e.target.value))}
@@ -265,14 +228,11 @@ function YouTubeComponent({ videoUrl }) {
       <Typography variant="body1">Start Time:</Typography>
       <input
         style={inputStyle}
-        size="small"
         type="number"
         value={startTime}
-        onChange={handleStartTimeChange}
+        onChange={onStartTimeChange}
         step="0.01"
       />
     </Box>
   );
 }
-
-export default YouTubeComponent;
