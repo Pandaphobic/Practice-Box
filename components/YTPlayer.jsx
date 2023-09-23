@@ -6,9 +6,9 @@ import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 // You can copy the ProgressBar component from your FilePlayer component
-import ProgressBar from "./ProgressBar";
 import { useAudio } from "@/store/context";
 import { TapTempo } from "./TapTempo";
+import urlParser from "js-video-url-parser";
 
 const inputStyle = {
   width: "5em",
@@ -30,6 +30,8 @@ function YouTubeComponent({ videoUrl }) {
   const ytPlayerRef = useRef(null);
   const progressBarRef = useRef(null);
 
+  const [videoId, setVideoId] = useState(null);
+
   const { volume, setVolume, countIn, setStartTime, startTime, bpm, setBpm } =
     useAudio();
 
@@ -37,8 +39,13 @@ function YouTubeComponent({ videoUrl }) {
 
   useEffect(() => {
     if (!videoUrl) return;
+    const parsed = urlParser.parse(videoUrl);
+    if (!parsed || !parsed.id) return;
+    setVideoId(parsed.id);
+  }, [videoUrl]);
 
-    const videoId = videoUrl.split("v=")[1].split("&")[0];
+  useEffect(() => {
+    if (!videoId) return;
 
     ytPlayerRef.current = new YouTubePlayer(playerElRef.current, {
       width: 640,
@@ -57,7 +64,7 @@ function YouTubeComponent({ videoUrl }) {
     return () => {
       ytPlayerRef.current.destroy();
     };
-  }, [videoUrl]);
+  }, [videoId]);
 
   const handleStartTimeChange = (event) => {
     const newStartTime = parseFloat(event.target.value);
@@ -112,7 +119,8 @@ function YouTubeComponent({ videoUrl }) {
       ytPlayerRef.current.seek(startTime);
     }
   };
-
+  // return null if no videoId
+  if (!videoId) return null;
   return (
     <Box>
       <div ref={playerElRef}></div>
