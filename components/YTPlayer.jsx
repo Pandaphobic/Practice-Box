@@ -9,6 +9,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useAudio } from "@/store/context";
 import { TapTempo } from "./TapTempo";
 import urlParser from "js-video-url-parser";
+import Countdown from "./Countdown";
 
 const inputStyle = {
   width: "5em",
@@ -29,11 +30,23 @@ function YouTubeComponent({ videoUrl }) {
   const playerElRef = useRef(null);
   const ytPlayerRef = useRef(null);
   const progressBarRef = useRef(null);
+  // Metronome block sound
+  const block2AudioRef = useRef(null);
 
   const [videoId, setVideoId] = useState(null);
 
-  const { volume, setVolume, countIn, setStartTime, startTime, bpm, setBpm } =
-    useAudio();
+  const {
+    volume,
+    setVolume,
+    countIn,
+    setCountIn,
+    setStartTime,
+    startTime,
+    bpm,
+    setBpm,
+    setCurrentCount,
+    currentCount,
+  } = useAudio();
 
   const [progress, setProgress] = useState(0);
 
@@ -43,6 +56,32 @@ function YouTubeComponent({ videoUrl }) {
     if (!parsed || !parsed.id) return;
     setVideoId(parsed.id);
   }, [videoUrl]);
+
+  useEffect(() => {
+    if (currentCount !== null && currentCount > 0) {
+      const millisecondsPerBeat = (60 / bpm) * 1000;
+
+      // Play the block sound for every number except 0
+      if (block2AudioRef.current) {
+        block2AudioRef.current.currentTime = 0; // Reset audio to start
+        block2AudioRef.current.play();
+      }
+
+      const countdownInterval = setInterval(() => {
+        setCurrentCount((prevCount) => prevCount - 1);
+      }, millisecondsPerBeat);
+
+      return () => {
+        clearInterval(countdownInterval); // Clean up the interval
+      };
+    } else if (currentCount === 0) {
+      const audioElement = playerElRef.current;
+      if (audioElement) {
+        handlePlay();
+      }
+      setCurrentCount(null); // Reset currentCount
+    }
+  }, [currentCount, bpm, setCurrentCount]);
 
   useEffect(() => {
     if (!videoId) return;
@@ -80,8 +119,19 @@ function YouTubeComponent({ videoUrl }) {
     }
   };
 
+  const playWithCountIn = () => {
+    setCurrentCount(countIn);
+  };
+
   const handlePause = () => {
     if (ytPlayerRef.current) {
+      ytPlayerRef.current.pause();
+    }
+  };
+
+  const handleStop = () => {
+    if (ytPlayerRef.current) {
+      ytPlayerRef.current.seek(startTime);
       ytPlayerRef.current.pause();
     }
   };
@@ -96,7 +146,6 @@ function YouTubeComponent({ videoUrl }) {
 
   const handleTimelineClick = (event) => {
     event.preventDefault();
-    event.stopPropagation();
 
     if (ytPlayerRef.current && progressBarRef.current) {
       const rect = progressBarRef.current.getBoundingClientRect(); // <-- use progressBarRef's bounding box
@@ -123,6 +172,21 @@ function YouTubeComponent({ videoUrl }) {
   if (!videoId) return null;
   return (
     <Box>
+      <div
+        style={{
+          border: "2px dashed #aaa",
+          padding: "20px",
+          position: "relative",
+          height: "200px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Countdown currentCount={currentCount} />
+      </div>
+      <audio id="block-audio" ref={block2AudioRef} src="/block.wav"></audio>
       <div ref={playerElRef}></div>
       <Box
         ref={progressBarRef}
@@ -147,11 +211,10 @@ function YouTubeComponent({ videoUrl }) {
           }}
         />
       </Box>
-      {/* Pass the click handler to ProgressBar */}
-      <IconButton variant="contained" onClick={handlePlay}>
+      <IconButton variant="contained" onClick={playWithCountIn}>
         <PlayArrowIcon />
       </IconButton>
-      <IconButton variant="contained" onClick={handlePause}>
+      <IconButton variant="contained" onClick={handleStop}>
         <StopIcon />
       </IconButton>
       <IconButton variant="contained" onClick={handleRestart}>

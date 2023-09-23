@@ -7,6 +7,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { TapTempo } from "./TapTempo";
+import Countdown from "./Countdown";
 
 const inputStyle = {
   width: "5em",
@@ -26,11 +27,15 @@ const inputStyle = {
 export default function FilePlayer({ audioSrc }) {
   const fileAudioRef = useRef(null);
   const progressBarRef = useRef(null);
+  // Metronome block sound
+  const blockAudioRef = useRef(null);
 
   const {
     volume,
     setVolume,
     countIn,
+    setCountIn,
+    currentCount,
     setCurrentCount,
     startTime,
     bpm,
@@ -39,6 +44,32 @@ export default function FilePlayer({ audioSrc }) {
   } = useAudio();
 
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (currentCount !== null && currentCount > 0) {
+      const millisecondsPerBeat = (60 / bpm) * 1000;
+
+      // Play the block sound for every number except 0
+      if (blockAudioRef.current) {
+        blockAudioRef.current.currentTime = 0; // Reset audio to start
+        blockAudioRef.current.play();
+      }
+
+      const countdownInterval = setInterval(() => {
+        setCurrentCount((prevCount) => prevCount - 1);
+      }, millisecondsPerBeat);
+
+      return () => {
+        clearInterval(countdownInterval); // Clean up the interval
+      };
+    } else if (currentCount === 0) {
+      const audioElement = fileAudioRef.current;
+      if (audioElement) {
+        audioElement.play();
+      }
+      setCurrentCount(null); // Reset currentCount
+    }
+  }, [currentCount, bpm, setCurrentCount]);
 
   useEffect(() => {
     const audioElement = fileAudioRef.current;
@@ -89,13 +120,11 @@ export default function FilePlayer({ audioSrc }) {
         clickPosition * fileAudioRef.current.duration;
     }
   };
-  // THIS COULD BE BETTER
+
   const playWithCountIn = () => {
     setCurrentCount(countIn);
-    if (fileAudioRef.current) {
-      fileAudioRef.current.play();
-    }
   };
+
   const onStartTimeChange = (event) => {
     const newStartTime = parseFloat(event.target.value);
     setStartTime(newStartTime);
@@ -106,10 +135,25 @@ export default function FilePlayer({ audioSrc }) {
 
   return (
     <Box>
+      <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
       <audio ref={fileAudioRef}>
         <source src={audioSrc} type="audio/mpeg" />
         Your browser does not support the audio element.
       </audio>
+      <div
+        style={{
+          border: "2px dashed #aaa",
+          padding: "20px",
+          position: "relative",
+          height: "200px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Countdown currentCount={currentCount} />
+      </div>
       <Box
         ref={progressBarRef}
         style={{
@@ -164,7 +208,7 @@ export default function FilePlayer({ audioSrc }) {
         style={inputStyle}
         type="number"
         value={countIn}
-        onChange={(e) => setCurrentCount(Number(e.target.value))}
+        onChange={(e) => setCountIn(Number(e.target.value))}
       />
       <Typography variant="body1">Start Time:</Typography>
       <input
