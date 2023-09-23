@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import YouTubePlayer from "yt-player";
 import { Box, IconButton, Input, Typography } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
@@ -49,6 +50,7 @@ function YouTubeComponent({ videoUrl }) {
   } = useAudio();
 
   const [progress, setProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (!videoUrl) return;
@@ -98,6 +100,14 @@ function YouTubeComponent({ videoUrl }) {
       const percentage =
         (currentTime / ytPlayerRef.current.getDuration()) * 100;
       setProgress(percentage);
+    });
+
+    ytPlayerRef.current.on("playing", () => {
+      setIsPlaying(true);
+    });
+
+    ytPlayerRef.current.on("paused", () => {
+      setIsPlaying(false);
     });
 
     return () => {
@@ -211,9 +221,15 @@ function YouTubeComponent({ videoUrl }) {
           }}
         />
       </Box>
-      <IconButton variant="contained" onClick={playWithCountIn}>
-        <PlayArrowIcon />
-      </IconButton>
+      {isPlaying ? (
+        <IconButton variant="contained" onClick={handlePause}>
+          <PauseIcon />
+        </IconButton>
+      ) : (
+        <IconButton variant="contained" onClick={playWithCountIn}>
+          <PlayArrowIcon />
+        </IconButton>
+      )}
       <IconButton variant="contained" onClick={handleStop}>
         <StopIcon />
       </IconButton>

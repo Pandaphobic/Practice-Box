@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useAudio } from "@/store/context";
-import { Box, IconButton, Input, Typography } from "@mui/material";
-
+import { Box, IconButton, Typography } from "@mui/material";
 // Material UI Icons
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { TapTempo } from "./TapTempo";
@@ -44,6 +44,7 @@ export default function FilePlayer({ audioSrc }) {
   } = useAudio();
 
   const [progress, setProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (currentCount !== null && currentCount > 0) {
@@ -74,6 +75,8 @@ export default function FilePlayer({ audioSrc }) {
   useEffect(() => {
     const audioElement = fileAudioRef.current;
     const handleTimeUpdate = () => {
+      // update isPlaying state
+      setIsPlaying(audioElement?.paused ? false : true);
       const percentage =
         (audioElement.currentTime / audioElement.duration) * 100;
       console.log("CurrentTime", audioElement.currentTime);
@@ -95,6 +98,12 @@ export default function FilePlayer({ audioSrc }) {
     if (fileAudioRef.current) {
       fileAudioRef.current.pause();
       fileAudioRef.current.currentTime = startTime;
+    }
+  };
+
+  const onPause = () => {
+    if (fileAudioRef.current) {
+      fileAudioRef.current.pause();
     }
   };
 
@@ -177,9 +186,15 @@ export default function FilePlayer({ audioSrc }) {
           }}
         />
       </Box>
-      <IconButton variant="contained" onClick={playWithCountIn}>
-        <PlayArrowIcon />
-      </IconButton>
+      {isPlaying ? (
+        <IconButton variant="contained" onClick={onPause}>
+          <PauseIcon />
+        </IconButton>
+      ) : (
+        <IconButton variant="contained" onClick={playWithCountIn}>
+          <PlayArrowIcon />
+        </IconButton>
+      )}
       <IconButton variant="contained" onClick={onStop}>
         <StopIcon />
       </IconButton>
