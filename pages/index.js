@@ -1,7 +1,7 @@
 import AudioPlayer from "@/components/AudioPlayer";
 import FilePlayer from "@/components/FilePlayer";
 import YouTubeComponent from "@/components/YTPlayer";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Card, CardContent, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 
 export default function Home() {
@@ -31,60 +31,66 @@ export default function Home() {
   return (
     <>
       <Box>
-        <div
-          onDrop={onDrop}
-          onDragOver={onDragOver}
+        <Card
           style={{
-            border: "2px dashed #aaa",
-            padding: "20px",
-            position: "relative",
-            height: "200px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "10px",
+            maxWidth: 700,
+            // center on screen
+            margin: "auto",
+            marginTop: "20px",
+            marginBottom: "20px",
           }}
         >
-          <Typography variant="h5">Drop your audio file here</Typography>
-        </div>
+          <CardContent>
+            {!(audioSrc || videoUrl) && (
+              <>
+                <div
+                  onDrop={onDrop}
+                  onDragOver={onDragOver}
+                  style={{
+                    border: "2px dashed #aaa",
+                    padding: "20px",
+                    position: "relative",
+                    height: "200px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <Typography variant="h5">
+                    Drop your audio file here
+                  </Typography>
+                </div>
+                <div
+                  style={{
+                    border: "2px dashed #aaa",
+                    padding: "20px",
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <TextField
+                    id="outlined-basic"
+                    label="YouTube URL"
+                    variant="outlined"
+                    value={videoUrl}
+                    onChange={(event) => {
+                      setVideoUrl(event.target.value);
+                    }}
+                  />
+                </div>
+              </>
+            )}
 
-        <div
-          style={{
-            border: "2px dashed #aaa",
-            padding: "20px",
-            position: "relative",
-
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "10px",
-          }}
-        >
-          <TextField
-            id="outlined-basic"
-            label="YouTube URL"
-            variant="outlined"
-            value={videoUrl}
-            onChange={(event) => {
-              setVideoUrl(event.target.value);
-            }}
-          />
-        </div>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "10px",
-          }}
-        >
-          {videoUrl && <YouTubeComponent videoUrl={videoUrl} />}
-          {audioSrc && <FilePlayer audioSrc={audioSrc} />}
-        </Box>
+            {videoUrl && <YouTubeComponent videoUrl={videoUrl} />}
+            {audioSrc && <FilePlayer audioSrc={audioSrc} />}
+          </CardContent>
+        </Card>
       </Box>
     </>
   );

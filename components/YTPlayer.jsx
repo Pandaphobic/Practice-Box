@@ -183,13 +183,18 @@ function YouTubeComponent({ videoUrl }) {
   // return null if no videoId
   if (!videoId) return null;
   return (
-    <Box>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+    >
       <div
+        // this will sit in the middle of the screen, on top of the video
         style={{
-          border: "2px dashed #aaa",
           padding: "20px",
           position: "relative",
-          height: "200px",
+          height: "40px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -199,80 +204,109 @@ function YouTubeComponent({ videoUrl }) {
         <Countdown currentCount={currentCount} />
       </div>
       <audio id="block-audio" ref={block2AudioRef} src="/block.wav"></audio>
-      <div ref={playerElRef}></div>
-      <Box
-        ref={progressBarRef}
-        style={{
-          width: "100%",
-          height: "20px",
-          backgroundColor: "#ddd",
-          marginTop: "20px",
-          position: "relative",
-          cursor: "pointer",
-        }}
-        onClick={handleTimelineClick}
-      >
+      <Box display="flex" justifyContent="center">
         <Box
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            height: "100%",
-            width: `${progress}%`,
-            backgroundColor: "#666",
-          }}
-        />
+          maxWidth={550}
+          display="flex"
+          alignItems="center"
+          flexWrap="wrap"
+          gap={0}
+          justifyContent="space-around"
+        >
+          <div
+            style={{
+              // center
+              margin: "0 auto",
+              width: "640px",
+              height: "360px",
+            }}
+            ref={playerElRef}
+          ></div>
+          <Box
+            ref={progressBarRef}
+            style={{
+              width: "100%",
+              height: "20px",
+              backgroundColor: "#ddd",
+              marginTop: "20px",
+              position: "relative",
+              cursor: "pointer",
+            }}
+            onClick={handleTimelineClick}
+          >
+            <Box
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                height: "100%",
+                width: `${progress}%`,
+                backgroundColor: "#666",
+              }}
+            />
+          </Box>
+          {isPlaying ? (
+            <IconButton variant="contained" onClick={handlePause}>
+              <PauseIcon />
+            </IconButton>
+          ) : (
+            <IconButton variant="contained" onClick={playWithCountIn}>
+              <PlayArrowIcon />
+            </IconButton>
+          )}
+          <IconButton variant="contained" onClick={handleStop}>
+            <StopIcon />
+          </IconButton>
+          <IconButton variant="contained" onClick={handleRestart}>
+            <RestartAltIcon />
+          </IconButton>
+          Volume:
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={handleVolumeChange}
+          />
+        </Box>
       </Box>
-      {isPlaying ? (
-        <IconButton variant="contained" onClick={handlePause}>
-          <PauseIcon />
-        </IconButton>
-      ) : (
-        <IconButton variant="contained" onClick={playWithCountIn}>
-          <PlayArrowIcon />
-        </IconButton>
-      )}
-      <IconButton variant="contained" onClick={handleStop}>
-        <StopIcon />
-      </IconButton>
-      <IconButton variant="contained" onClick={handleRestart}>
-        <RestartAltIcon />
-      </IconButton>
-      Volume:
-      <input
-        type="range"
-        min="0"
-        max="1"
-        step="0.01"
-        value={volume}
-        onChange={handleVolumeChange}
-      />
-      <Typography variant="body1">BPM:</Typography>
-      <input
-        style={inputStyle}
-        size="small"
-        type="number"
-        value={bpm}
-        onChange={(e) => setBpm(Number(e.target.value))}
-      />
-      <TapTempo setMainBpm={setBpm} />
-      <Typography variant="body1">Count-In: </Typography>
-      <input
-        style={inputStyle}
-        size="small"
-        type="number"
-        value={countIn}
-        onChange={(e) => setCountIn(Number(e.target.value))}
-      />
-      <Typography variant="body1">Start Time:</Typography>
-      <input
-        style={inputStyle}
-        size="small"
-        type="number"
-        value={startTime}
-        onChange={handleStartTimeChange}
-        step="0.01"
-      />
+      <Box display="flex" justifyContent="center" maxWidth={500}>
+        <Box
+          display="flex"
+          alignItems="center"
+          flexWrap="wrap"
+          gap={1}
+          justifyContent="space-around"
+        >
+          <Typography variant="body1">BPM:</Typography>
+          <input
+            style={inputStyle}
+            size="small"
+            type="number"
+            value={bpm}
+            onChange={(e) => setBpm(Number(e.target.value))}
+          />
+          <TapTempo setMainBpm={setBpm} />
+          <Typography variant="body1">Count-In: </Typography>
+          <input
+            style={inputStyle}
+            size="small"
+            type="number"
+            value={countIn}
+            onChange={(e) => setCountIn(Number(e.target.value))}
+          />
+          <Typography variant="body1">Start Time:</Typography>
+          <input
+            style={inputStyle}
+            size="small"
+            type="number"
+            value={startTime}
+            onChange={handleStartTimeChange}
+            step="0.01"
+          />{" "}
+        </Box>
+      </Box>
     </Box>
   );
 }
