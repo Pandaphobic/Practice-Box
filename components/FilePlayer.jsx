@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAudio } from "@/store/context";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
 // Material UI Icons
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -10,7 +10,7 @@ import { TapTempo } from "./TapTempo";
 import Countdown from "./Countdown";
 
 const inputStyle = {
-  width: "5em",
+  width: "4em",
   backgroundColor: "#16171B",
   color: "#FFFFFF",
   outline: "none",
@@ -151,7 +151,6 @@ export default function FilePlayer({ audioSrc }) {
       </audio>
       <div
         style={{
-          border: "2px dashed #aaa",
           padding: "20px",
           position: "relative",
           height: "200px",
@@ -210,29 +209,41 @@ export default function FilePlayer({ audioSrc }) {
         value={volume}
         onChange={onVolumeChange}
       />
-      <Typography variant="body1">BPM:</Typography>
-      <input
-        style={inputStyle}
-        type="number"
-        value={bpm}
-        onChange={(e) => setBpm(Number(e.target.value))}
-      />
-      <TapTempo setMainBpm={setBpm} />
-      <Typography variant="body1">Count-In: </Typography>
-      <input
-        style={inputStyle}
-        type="number"
-        value={countIn}
-        onChange={(e) => setCountIn(Number(e.target.value))}
-      />
-      <Typography variant="body1">Start Time:</Typography>
-      <input
-        style={inputStyle}
-        type="number"
-        value={startTime}
-        onChange={onStartTimeChange}
-        step="0.01"
-      />
+      <Box display="flex" justifyContent="center">
+        <Box
+          display="flex"
+          alignItems="center"
+          flexWrap="wrap"
+          gap={2}
+          justifyContent="space-around"
+        >
+          <Typography variant="body1">BPM:</Typography>
+          <input
+            style={inputStyle}
+            type="number"
+            value={bpm}
+            onChange={(e) => setBpm(Number(e.target.value))}
+          />
+          <TapTempo setMainBpm={setBpm} />
+
+          <Typography variant="body1">Count-In: </Typography>
+          <input
+            style={inputStyle}
+            type="number"
+            value={countIn}
+            onChange={(e) => setCountIn(Number(e.target.value))}
+          />
+
+          <Typography variant="body1">Start Time:</Typography>
+          <input
+            style={inputStyle}
+            type="number"
+            value={startTime}
+            onChange={onStartTimeChange}
+            step="0.01"
+          />
+        </Box>
+      </Box>
     </Box>
   );
 }
