@@ -1,7 +1,14 @@
 import AudioPlayer from "@/components/AudioPlayer";
 import FilePlayer from "@/components/FilePlayer";
 import YouTubeComponent from "@/components/YTPlayer";
-import { Box, Card, CardContent, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 
 export default function Home() {
@@ -40,6 +47,22 @@ export default function Home() {
             marginBottom: "20px",
           }}
         >
+          <CardHeader
+            title="Practice Box - Metronom / Count In"
+            subheader={
+              <a
+                style={{
+                  // nice green from elsewhere
+                  color: "#4caf50",
+                  textDecoration: "none",
+                }}
+                href="https://github.com/Pandaphobic/Practice-Box"
+              >
+                Pandaphobic (GitHub)
+              </a>
+            }
+          />
+
           <CardContent>
             {!(audioSrc || videoUrl) && (
               <>
@@ -77,6 +100,7 @@ export default function Home() {
                   <TextField
                     id="outlined-basic"
                     label="YouTube URL"
+                    fullWidth
                     variant="outlined"
                     value={videoUrl}
                     onChange={(event) => {
