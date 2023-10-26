@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import YouTubePlayer from "yt-player";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 // Material UI Icons
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -32,8 +32,9 @@ function YouTubeComponent({ videoUrl }) {
   const playerElRef = useRef(null);
   const ytPlayerRef = useRef(null);
   const progressBarRef = useRef(null);
-  // Metronome block sound
-  const block2AudioRef = useRef(null);
+  // Metronome block sound ref
+  // Setting it here allows us to watch it here, but use it in Countdown.jsx
+  const blockAudioRef = useRef(null);
 
   const [videoId, setVideoId] = useState(null);
 
@@ -42,12 +43,12 @@ function YouTubeComponent({ videoUrl }) {
     setVolume,
     countIn,
     setCountIn,
-    setStartTime,
-    startTime,
-    bpm,
-    setBpm,
     setCurrentCount,
     currentCount,
+    startTime,
+    setStartTime,
+    bpm,
+    setBpm,
   } = useAudio();
 
   const [progress, setProgress] = useState(0);
@@ -65,9 +66,9 @@ function YouTubeComponent({ videoUrl }) {
       const millisecondsPerBeat = (60 / bpm) * 1000;
 
       // Play the block sound for every number except 0
-      if (block2AudioRef.current) {
-        block2AudioRef.current.currentTime = 0; // Reset audio to start
-        block2AudioRef.current.play();
+      if (blockAudioRef.current) {
+        blockAudioRef.current.currentTime = 0; // Reset audio to start
+        blockAudioRef.current.play();
       }
 
       const countdownInterval = setInterval(() => {
@@ -125,14 +126,14 @@ function YouTubeComponent({ videoUrl }) {
     }
   };
 
+  const playWithCountIn = () => {
+    setCurrentCount(countIn);
+  };
+
   const handlePlay = () => {
     if (ytPlayerRef.current) {
       ytPlayerRef.current.play();
     }
-  };
-
-  const playWithCountIn = () => {
-    setCurrentCount(countIn);
   };
 
   const handlePause = () => {
@@ -161,15 +162,9 @@ function YouTubeComponent({ videoUrl }) {
 
     if (ytPlayerRef.current && progressBarRef.current) {
       const rect = progressBarRef.current.getBoundingClientRect(); // <-- use progressBarRef's bounding box
-      console.log("rect: ", rect);
       const clickPosition = (event.clientX - rect.left) / rect.width;
-      console.log("clickPosition: ", clickPosition);
-      console.log("duration: ", ytPlayerRef.current.getDuration());
       ytPlayerRef.current.seek(
         // round to 2 decimal places
-        Math.round(clickPosition * ytPlayerRef.current.getDuration())
-      );
-      setStartTime(
         Math.round(clickPosition * ytPlayerRef.current.getDuration())
       );
     }
@@ -180,6 +175,16 @@ function YouTubeComponent({ videoUrl }) {
       ytPlayerRef.current.seek(startTime);
     }
   };
+
+  const handleSetTime = () => {
+    // get the current time
+    const currentTime = ytPlayerRef.current.getCurrentTime();
+    // set the startTime to the currentTime
+    setStartTime(currentTime);
+    // pause the video
+    ytPlayerRef.current.pause();
+  };
+
   // return null if no videoId
   if (!videoId) return null;
   return (
@@ -201,9 +206,9 @@ function YouTubeComponent({ videoUrl }) {
           justifyContent: "center",
         }}
       >
-        <Countdown currentCount={currentCount} />
+        <Countdown currentCount={currentCount} blockAudioRef={blockAudioRef} />
       </div>
-      <audio id="block-audio" ref={block2AudioRef} src="/block.wav"></audio>
+
       <Box display="flex" justifyContent="center">
         <Box
           maxWidth={550}
@@ -269,6 +274,16 @@ function YouTubeComponent({ videoUrl }) {
             value={volume}
             onChange={handleVolumeChange}
           />
+          <Button
+            style={{
+              borderRadius: "6px",
+              padding: "0",
+            }}
+            variant="contained"
+            onClick={handleSetTime}
+          >
+            Set Start
+          </Button>
         </Box>
       </Box>
       <Box display="flex" justifyContent="center" maxWidth={500}>
@@ -304,7 +319,7 @@ function YouTubeComponent({ videoUrl }) {
             value={startTime}
             onChange={handleStartTimeChange}
             step="0.01"
-          />{" "}
+          />
         </Box>
       </Box>
     </Box>

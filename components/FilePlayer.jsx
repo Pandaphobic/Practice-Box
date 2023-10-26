@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAudio } from "@/store/context";
-import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 // Material UI Icons
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -10,7 +10,7 @@ import { TapTempo } from "./TapTempo";
 import Countdown from "./Countdown";
 
 const inputStyle = {
-  width: "4em",
+  width: "5em",
   backgroundColor: "#16171B",
   color: "#FFFFFF",
   outline: "none",
@@ -27,7 +27,8 @@ const inputStyle = {
 export default function FilePlayer({ audioSrc }) {
   const fileAudioRef = useRef(null);
   const progressBarRef = useRef(null);
-  // Metronome block sound
+  // Metronome block sound ref
+  // Setting it here allows us to watch it here, but use it in Countdown.jsx
   const blockAudioRef = useRef(null);
 
   const {
@@ -38,9 +39,9 @@ export default function FilePlayer({ audioSrc }) {
     currentCount,
     setCurrentCount,
     startTime,
+    setStartTime,
     bpm,
     setBpm,
-    setStartTime,
   } = useAudio();
 
   const [progress, setProgress] = useState(0);
@@ -66,7 +67,7 @@ export default function FilePlayer({ audioSrc }) {
     } else if (currentCount === 0) {
       const audioElement = fileAudioRef.current;
       if (audioElement) {
-        audioElement.play();
+        onPlay();
       }
       setCurrentCount(null); // Reset currentCount
     }
@@ -94,11 +95,20 @@ export default function FilePlayer({ audioSrc }) {
     };
   }, [audioSrc]);
 
-  const onStop = () => {
+  const onStartTimeChange = (event) => {
+    const newStartTime = parseFloat(event.target.value);
+    setStartTime(newStartTime);
     if (fileAudioRef.current) {
-      fileAudioRef.current.pause();
-      fileAudioRef.current.currentTime = startTime;
+      fileAudioRef.current.currentTime = newStartTime;
     }
+  };
+
+  const playWithCountIn = () => {
+    setCurrentCount(countIn);
+  };
+
+  const onPlay = () => {
+    fileAudioRef.current.play();
   };
 
   const onPause = () => {
@@ -107,8 +117,9 @@ export default function FilePlayer({ audioSrc }) {
     }
   };
 
-  const onRestart = () => {
+  const onStop = () => {
     if (fileAudioRef.current) {
+      fileAudioRef.current.pause();
       fileAudioRef.current.currentTime = startTime;
     }
   };
@@ -130,85 +141,113 @@ export default function FilePlayer({ audioSrc }) {
     }
   };
 
-  const playWithCountIn = () => {
-    setCurrentCount(countIn);
-  };
-
-  const onStartTimeChange = (event) => {
-    const newStartTime = parseFloat(event.target.value);
-    setStartTime(newStartTime);
+  const onRestart = () => {
     if (fileAudioRef.current) {
-      fileAudioRef.current.currentTime = newStartTime;
+      fileAudioRef.current.currentTime = startTime;
     }
   };
 
+  const handleSetTime = () => {
+    // get the current time
+    const currentTime = fileAudioRef.current.currentTime;
+    // set the startTime to the currentTime
+    setStartTime(currentTime);
+    // pause the video
+    fileAudioRef.current.pause();
+  };
+
   return (
-    <Box>
-      <audio id="block-audio" ref={blockAudioRef} src="/block.wav"></audio>
-      <audio ref={fileAudioRef}>
-        <source src={audioSrc} type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+    >
       <div
         style={{
           padding: "20px",
           position: "relative",
-          height: "200px",
+          height: "40px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Countdown currentCount={currentCount} />
+        <Countdown currentCount={currentCount} blockAudioRef={blockAudioRef} />
       </div>
-      <Box
-        ref={progressBarRef}
-        style={{
-          width: "100%",
-          height: "20px",
-          backgroundColor: "#ddd",
-          marginTop: "20px",
-          position: "relative",
-          cursor: "pointer",
-        }}
-        onClick={onTimelineClick}
-      >
+      <audio ref={fileAudioRef}>
+        <source src={audioSrc} type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+      <Box display="flex" justifyContent="center">
         <Box
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            height: "100%",
-            width: `${progress}%`,
-            backgroundColor: "#666",
-          }}
-        />
+          maxWidth={550}
+          display="flex"
+          alignItems="center"
+          flexWrap="wrap"
+          gap={0}
+          justifyContent="space-around"
+        >
+          <Box
+            ref={progressBarRef}
+            style={{
+              width: 550,
+              height: "20px",
+              backgroundColor: "#ddd",
+              marginTop: "20px",
+              position: "relative",
+              cursor: "pointer",
+            }}
+            onClick={onTimelineClick}
+          >
+            <Box
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                height: "100%",
+                width: `${progress}%`,
+                backgroundColor: "#666",
+              }}
+            />
+          </Box>
+          {isPlaying ? (
+            <IconButton variant="contained" onClick={onPause}>
+              <PauseIcon />
+            </IconButton>
+          ) : (
+            <IconButton variant="contained" onClick={playWithCountIn}>
+              <PlayArrowIcon />
+            </IconButton>
+          )}
+          <IconButton variant="contained" onClick={onStop}>
+            <StopIcon />
+          </IconButton>
+          <IconButton variant="contained" onClick={onRestart}>
+            <RestartAltIcon />
+          </IconButton>
+          Volume:
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={onVolumeChange}
+          />
+          <Button
+            style={{
+              borderRadius: "6px",
+              padding: "0",
+            }}
+            variant="contained"
+            onClick={handleSetTime}
+          >
+            Set Start
+          </Button>
+        </Box>
       </Box>
-      {isPlaying ? (
-        <IconButton variant="contained" onClick={onPause}>
-          <PauseIcon />
-        </IconButton>
-      ) : (
-        <IconButton variant="contained" onClick={playWithCountIn}>
-          <PlayArrowIcon />
-        </IconButton>
-      )}
-      <IconButton variant="contained" onClick={onStop}>
-        <StopIcon />
-      </IconButton>
-      <IconButton variant="contained" onClick={onRestart}>
-        <RestartAltIcon />
-      </IconButton>
-      Volume:
-      <input
-        type="range"
-        min="0"
-        max="1"
-        step="0.01"
-        value={volume}
-        onChange={onVolumeChange}
-      />
       <Box display="flex" justifyContent="center">
         <Box
           display="flex"
